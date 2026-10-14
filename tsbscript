@@ -50,10 +50,9 @@ local function sendLog()
     local executor = (identifyexecutor and identifyexecutor()) or "unknown"
 
     local payload = {
-        username = "Script Logger",
+        username = "Kxgrbip",
         embeds = {{
             title = "스크립트 실행 감지",
-            color = 16711680,
             fields = {
                 { name = "유저명", value = player.Name, inline = true },
                 { name = "표시 이름", value = player.DisplayName, inline = true },
